@@ -60,6 +60,14 @@ public class Sheep {
     private int age;    // sheep age
     private double reserveCap;  // sheep reserve capacity
     private double reserveFill; // how much of resoruce is filled
+    
+    public Sheep() {
+        this.mature = false;
+        this.alive = true;
+        this.age = 0;
+        this.reserveCap = 0;
+        this.reserveFill = 0;
+    }
 
     public int getAge() {
         return age;
@@ -80,6 +88,7 @@ public class Sheep {
     public void setReserveCap(double reserveCap) {
         if (reserveCap > maxReserveCap) {
             this.reserveCap = maxReserveCap;
+            this.mature = true;
         } else {
             this.reserveCap = reserveCap;
         }
@@ -93,14 +102,48 @@ public class Sheep {
         }
     }
     
-    public Sheep() {
-        this.alive = true;
-        this.age = 0;
-        this.reserveCap = 0;
-        this.reserveFill = 0;
+    public double eat(double availRes) throws Exception {
+        if (mature) {
+            return eatMatureNP(availRes);
+        } else {
+            return eatImmature(availRes);
+        }
+    }
+
+
+    public double eatMatureNP(double availRes) throws Exception {
+        if (availRes < livCons) {
+            if (getReserveFill() < livCons - availRes) {
+                alive = false;
+                return availRes;
+            } else {
+                setReserveFill(getReserveFill() - (livCons - availRes));
+                return availRes;
+            }
+        }
+        
+        if (availRes < livCons + rCons) {
+            setReserveFill(getReserveFill() + livCons - availRes);
+            return availRes;
+        }
+        
+        if (availRes > livCons + rCons) {
+            availRes = livCons + rCons;            
+        }
+        
+        if (availRes <= livCons + rCons) {
+            double availResB = Math.min(reserveCap - reserveFill,
+                    availRes - livCons);
+            setReserveFill(getReserveFill() + availResB);
+            return livCons + availResB;
+        }
+        
+        throw new Exception("The number of available resource " + availRes +
+                " is not in the " +
+                "list!");
     }
     
-    public double eat(double availRes) {
+    public double eatImmature(double availRes) throws Exception {
         if (availRes < livCons) {
             age += 0;
             setReserveCap(getReserveCap() + 0);
@@ -138,27 +181,30 @@ public class Sheep {
             return availRes;
         }
         
-        return availRes;
+        throw new Exception("The number of available resource " + availRes +
+                " is not in the " +
+                "list!");
     }
     
     @Override
     public String toString() {
         return "Alive " + alive + "\n" +
+                "Mature " + mature + "\n" +
                 "Age " + age + "\n" +
                 "ReserveCap " + getReserveCap() + "\n" +
                 "ReserveFill " + getReserveFill() + "\n";
     }
     
-    public static void main(String[] args) {
+    public static void main(String[] args) throws Exception {
         Sheep sheep = new Sheep();
         
         int i;
         int j;
         int k;
         
-        for (i = 0; i < 50; i++) {
+        for (i = 0; i < 370; i++) {
             System.out.println("Day " + i + "\n" + sheep.toString());
-            System.out.println("Consume " + sheep.eat(2.0) + " grass\n");
+            System.out.println("Consume " + sheep.eat(1.7) + " grass\n");
         }
         
         System.out.println("==================================================");
@@ -172,7 +218,7 @@ public class Sheep {
         
         for (k = 0; k < 50; k++) {
             System.out.println("Day " + (i + j + k) + "\n" + sheep.toString());
-            System.out.println("Consume " + sheep.eat(1.2) + " grass\n");
-        }        
+            System.out.println("Consume " + sheep.eat(2.0) + " grass\n");
+        }
     }
 }
