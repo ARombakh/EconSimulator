@@ -110,7 +110,6 @@ public class Sheep {
         }
     }
 
-
     public double eatMatureNP(double availRes) throws Exception {
         if (availRes < livCons) {
             if (getReserveFill() < livCons - availRes) {
@@ -127,6 +126,7 @@ public class Sheep {
             return availRes;
         }
         
+        // ??? doubtful practice
         if (availRes > livCons + rCons) {
             availRes = livCons + rCons;            
         }
@@ -202,9 +202,16 @@ public class Sheep {
         int j;
         int k;
         
+        GrassAcre ga = new GrassAcre(4);
+        
         for (i = 0; i < 370; i++) {
-            System.out.println("Day " + i + "\n" + sheep.toString());
-            System.out.println("Consume " + sheep.eat(1.7) + " grass\n");
+            ga.increment();
+            System.out.println("Day " + i + "\n" + ga);
+            System.out.println("Day " + i + "\n" + sheep);
+            double eaten = sheep.eat(ga.availRes());
+            System.out.println("Consume " + eaten + " grass\n");
+            ga.resourceEaten(eaten);
+            System.out.println(ga);
         }
         
         System.out.println("==================================================");
@@ -212,6 +219,7 @@ public class Sheep {
         for (j = 0; j < 10; j++) {
             System.out.println("Day " + (i + j) + "\n" + sheep.toString());
             System.out.println("Consume " + sheep.eat(0.4) + " grass\n");
+            System.out.println(ga);
         }        
         
         System.out.println("==================================================");
@@ -219,6 +227,7 @@ public class Sheep {
         for (k = 0; k < 50; k++) {
             System.out.println("Day " + (i + j + k) + "\n" + sheep.toString());
             System.out.println("Consume " + sheep.eat(2.0) + " grass\n");
+            System.out.println(ga);
         }
     }
 }
