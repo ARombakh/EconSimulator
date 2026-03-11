@@ -9,47 +9,47 @@ package ru.specialist.entities;
  * @author artyom
  */
 public class Sheep {
-    private static final int maxAge = 1800;
-    private static final int maturAge = 360;
-    private static final double maxReserveCap = 50;  // reserve capacity
+    private static final int MAX_AGE = 1800;
+    private static final int MATUR_AGE = 360;
+    private static final double MAX_RESERVE_CAP = 50;  // reserve capacity
     
-    private static final double pregReserveCap = 15;  // pregnancy reserve 
+    private static final double PREG_RESERVE_CAP = 15;  // pregnancy reserve 
                                                     // capacity
     
-    private static final double matureDC = 2;   // daily consumption of mature
+    private static final double MATURE_DC = 2;   // daily consumption of mature
                                                 // sheep
     
-    private static final double livConsPart = .35;  // part of consumption spend
+    private static final double LIV_CONS_PART = .35;  // part of consumption spend
                                                     // on living
     
-    private static final double pregRConsPart = .15;  // part of consumption 
+    private static final double PREG_R_CONS_PART = .15;  // part of consumption 
                                                     // spend on filling
                                                     // pregnancy reserve
     
-    private static final double rConsPart = .50;  // part of consumption
+    private static final double R_CONS_PART = .50;  // part of consumption
                                                     // spend on filling reserve
     
-    private static final double livCons = livConsPart * matureDC;  
+    private static final double LIV_CONS = LIV_CONS_PART * MATURE_DC;  
                                                     // consumption spend on 
                                                     // living
     
-    private static final double pregRCons = pregRConsPart * matureDC;  
+    private static final double PREG_R_CONS = PREG_R_CONS_PART * MATURE_DC;  
                                                     // consumption spend on 
                                                     // filling pregnancy reserve
 
-    private static final double rCons = rConsPart * matureDC;  // consumption
+    private static final double R_CONS = R_CONS_PART * MATURE_DC;  // consumption
                                                     //  spend on filling
                                                     // reserve
 
-    private static final double rFillPerDayImm = maxReserveCap / maturAge;
+    private static final double R_FILL_PER_DAY_IMM = MAX_RESERVE_CAP / MATUR_AGE;
                                                 // daily fill of reserve
                                                 // for immature sheep
     
                                                 // also fill per day of resource
                                                 // capacity for immature sheep
     
-    private static final double rBuildPerDayCons = rConsPart * matureDC -
-                                                rFillPerDayImm;
+    private static final double R_BUILD_PER_DAY_CONS = R_CONS_PART * MATURE_DC -
+                                                R_FILL_PER_DAY_IMM;
                                                 // daily consumption for 
                                                 // buildup of reserve
                                                 // capacity for immature sheep
@@ -92,18 +92,18 @@ public class Sheep {
     public void setAge(int age) {
         this.age = age;
         // ??? should we check is-flags here?
-        if (this.age >= maturAge && isMature() == false) {
+        if (this.age >= MATUR_AGE && isMature() == false) {
             setMature(true);
         }
         
-        if (this.age >= maxAge && isAlive() == true) {
+        if (this.age >= MAX_AGE && isAlive() == true) {
             setAlive(false);
         }
     }
 
     public void setReserveCap(double reserveCap) {
-        if (reserveCap > maxReserveCap) {
-            this.reserveCap = maxReserveCap;
+        if (reserveCap > MAX_RESERVE_CAP) {
+            this.reserveCap = MAX_RESERVE_CAP;
             this.mature = true;
         } else {
             this.reserveCap = reserveCap;
@@ -111,8 +111,8 @@ public class Sheep {
     }
 
     public void setReserveFill(double reserveFill) {
-        if (reserveFill > maxReserveCap) {
-            this.reserveFill = maxReserveCap;
+        if (reserveFill > MAX_RESERVE_CAP) {
+            this.reserveFill = MAX_RESERVE_CAP;
         } else {
             this.reserveFill = reserveFill;
         }
@@ -136,31 +136,31 @@ public class Sheep {
 
     public double eatMatureNP(double availRes) throws Exception {
         setAge(getAge() + 1);
-        if (availRes < livCons) {
-            if (getReserveFill() < livCons - availRes) {
+        if (availRes < LIV_CONS) {
+            if (getReserveFill() < LIV_CONS - availRes) {
                 alive = false;
                 return availRes;
             } else {
-                setReserveFill(getReserveFill() - (livCons - availRes));
+                setReserveFill(getReserveFill() - (LIV_CONS - availRes));
                 return availRes;
             }
         }
         
-        if (availRes < livCons + rCons) {
-            setReserveFill(getReserveFill() + livCons - availRes);
+        if (availRes < LIV_CONS + R_CONS) {
+            setReserveFill(getReserveFill() + LIV_CONS - availRes);
             return availRes;
         }
         
         // ??? doubtful practice
-        if (availRes > livCons + rCons) {
-            availRes = livCons + rCons;            
+        if (availRes > LIV_CONS + R_CONS) {
+            availRes = LIV_CONS + R_CONS;            
         }
         
-        if (availRes <= livCons + rCons) {
+        if (availRes <= LIV_CONS + R_CONS) {
             double availResB = Math.min(reserveCap - reserveFill,
-                    availRes - livCons);
+                    availRes - LIV_CONS);
             setReserveFill(getReserveFill() + availResB);
-            return livCons + availResB;
+            return LIV_CONS + availResB;
         }
         
         throw new Exception("The number of available resource " + availRes +
@@ -170,20 +170,20 @@ public class Sheep {
     
     public double eatImmature(double availRes) throws Exception {
         setAge(getAge() + 1);
-        if (availRes < livCons) {
+        if (availRes < LIV_CONS) {
             setReserveCap(getReserveCap() + 0);
-            if (getReserveFill() < livCons - availRes) {
+            if (getReserveFill() < LIV_CONS - availRes) {
                 alive = false;
                 return availRes;
             } else {
-                setReserveFill(getReserveFill() - (livCons - availRes));
+                setReserveFill(getReserveFill() - (LIV_CONS - availRes));
                 return availRes;
             }
         }
         
-        if (availRes < rBuildPerDayCons + livCons) {
+        if (availRes < R_BUILD_PER_DAY_CONS + LIV_CONS) {
             setReserveCap(getReserveCap() + 0);
-            double factCons = availRes - livCons;
+            double factCons = availRes - LIV_CONS;
             double toRes = Math.min(factCons, getReserveCap() -
                     getReserveFill());
             setReserveFill(getReserveFill() + toRes);
@@ -193,14 +193,14 @@ public class Sheep {
         }
 
         // ??? doubtful practice
-        if (availRes > livCons + rCons) {
-            availRes = livCons + rCons;
+        if (availRes > LIV_CONS + R_CONS) {
+            availRes = LIV_CONS + R_CONS;
         }
         
-        if (availRes <= livCons + rCons) {
-            setReserveCap(getReserveCap() + rFillPerDayImm);
-            setReserveFill(getReserveFill() + availRes - livCons -
-                    rBuildPerDayCons);
+        if (availRes <= LIV_CONS + R_CONS) {
+            setReserveCap(getReserveCap() + R_FILL_PER_DAY_IMM);
+            setReserveFill(getReserveFill() + availRes - LIV_CONS -
+                    R_BUILD_PER_DAY_CONS);
             return availRes;
         }
         
