@@ -81,8 +81,23 @@ public class Sheep {
         return reserveFill;
     }
 
+    public boolean isMature() {
+        return mature;
+    }
+
+    public boolean isAlive() {
+        return alive;
+    }
+
     public void setAge(int age) {
         this.age = age;
+        if (this.age >= maturAge && isMature() == false) {
+            setMature(true);
+        }
+        
+        if (this.age >= maxAge && isAlive() == true) {
+            setAlive(false);
+        }
     }
 
     public void setReserveCap(double reserveCap) {
@@ -101,6 +116,14 @@ public class Sheep {
             this.reserveFill = reserveFill;
         }
     }
+
+    public void setMature(boolean mature) {
+        this.mature = mature;
+    }
+
+    public void setAlive(boolean alive) {
+        this.alive = alive;
+    }
     
     public double eat(double availRes) throws Exception {
         if (mature) {
@@ -111,6 +134,7 @@ public class Sheep {
     }
 
     public double eatMatureNP(double availRes) throws Exception {
+        setAge(getAge() + 1);
         if (availRes < livCons) {
             if (getReserveFill() < livCons - availRes) {
                 alive = false;
@@ -144,8 +168,8 @@ public class Sheep {
     }
     
     public double eatImmature(double availRes) throws Exception {
+        setAge(getAge() + 1);
         if (availRes < livCons) {
-            age += 0;
             setReserveCap(getReserveCap() + 0);
             if (getReserveFill() < livCons - availRes) {
                 alive = false;
@@ -157,7 +181,6 @@ public class Sheep {
         }
         
         if (availRes < rBuildPerDayCons + livCons) {
-            age += 0;
             setReserveCap(getReserveCap() + 0);
             double factCons = availRes - livCons;
             double toRes = Math.min(factCons, getReserveCap() -
@@ -174,7 +197,6 @@ public class Sheep {
         }
         
         if (availRes <= livCons + rCons) {
-            age += 1;
             setReserveCap(getReserveCap() + rFillPerDayImm);
             setReserveFill(getReserveFill() + availRes - livCons -
                     rBuildPerDayCons);
@@ -202,7 +224,7 @@ public class Sheep {
         int j;
         int k;
         
-        GrassAcre ga = new GrassAcre(4);
+        GrassAcre ga = new GrassAcre(3);
         
         for (i = 0; i < 370; i++) {
             ga.increment();
