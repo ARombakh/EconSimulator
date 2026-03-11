@@ -91,6 +91,7 @@ public class Sheep {
 
     public void setAge(int age) {
         this.age = age;
+        // ??? should we check is-flags here?
         if (this.age >= maturAge && isMature() == false) {
             setMature(true);
         }
