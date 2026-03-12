@@ -11,11 +11,11 @@ package ru.specialist;
 public class App {
     public static void main(String[] args) {
         EcoSystem system = new EcoSystem(3, 4);
-        
+        /*
         System.out.println(system.sheep.get(0));
         System.out.println(system.grass.get(0));
         
-        if (system.feedSheep(system.sheep.get(0), system.grass.get(0))) {
+        if (system.feedOneSheep(system.sheep.get(0), system.grass.get(0))) {
             System.out.println("Eating was successful\n");
         } else {
             System.out.println("Eating was UNsuccessful\n");
@@ -24,13 +24,21 @@ public class App {
         System.out.println(system.sheep.get(0));
         System.out.println(system.grass.get(0));
         
-        if (system.feedSheep(system.sheep.get(1), system.grass.get(0))) {
+        if (system.feedOneSheep(system.sheep.get(1), system.grass.get(0))) {
             System.out.println("Eating was successful\n");
         } else {
             System.out.println("Eating was UNsuccessful\n");
         }
         
         System.out.println(system.sheep.get(1));
-        System.out.println(system.grass.get(0));
+        System.out.println(system.grass.get(0));*/
+        
+        System.out.println(system);
+        
+        system.feedAllSheep();
+        
+        System.out.println("All sheep are fed\n");
+        
+        System.out.println(system);
     }
 }

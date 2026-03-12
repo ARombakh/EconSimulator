@@ -17,7 +17,10 @@ public class Sheep {
                                                     // capacity
     
     private static final double MATURE_DC = 2;   // daily consumption of mature
-                                                // sheep
+                                                // pregnant sheep
+    
+    private static final double DC = 1.7;   // daily consumption of mature and
+                                            // immature sheep
     
     private static final double LIV_CONS_PART = .35;  // part of consumption spend
                                                     // on living
@@ -61,12 +64,42 @@ public class Sheep {
     private double reserveCap;  // sheep reserve capacity
     private double reserveFill; // how much of resoruce is filled
     
+    private double consInDay;   // how much of resource totally was consumed 
+                                    // per day
+    private double livingConsDay;   // how much of resource for living was 
+                                    // consumed per day
+    private double resBConsDay; // how much of resource for building reserves
+                                // was consumed per day
+    private double resFConsDay; // how much of resource for filling reserves
+                                // was consumed per day
+    
     public Sheep() {
         this.mature = false;
         this.alive = true;
         this.age = 0;
         this.reserveCap = 0;
         this.reserveFill = 0;
+        
+        this.consInDay = 0;
+        this.livingConsDay = 0;
+        this.resBConsDay = 0;
+        this.resFConsDay = 0;
+    }
+
+    public double getConsInDay() {
+        return consInDay;
+    }
+
+    public double getLivingConsDay() {
+        return livingConsDay;
+    }
+
+    public double getResBConsDay() {
+        return resBConsDay;
+    }
+
+    public double getResFConsDay() {
+        return resFConsDay;
     }
 
     public int getAge() {
@@ -125,6 +158,39 @@ public class Sheep {
     public void setAlive(boolean alive) {
         this.alive = alive;
     }
+
+    public void setConsInDay(double consInDay) {
+        this.consInDay = consInDay;
+    }
+
+    public void setLivingConsDay(double livingConsDay) {
+        this.livingConsDay = livingConsDay;
+    }
+
+    public void setResBConsDay(double resBConsDay) {
+        this.resBConsDay = resBConsDay;
+    }
+
+    public void setResFConsDay(double resFConsDay) {
+        this.resFConsDay = resFConsDay;
+    }
+    
+    public void updConsInDay() {
+        if (mature) {
+            setConsInDay(getLivingConsDay() + getResFConsDay());
+        } else {
+            setConsInDay(getLivingConsDay() + getResBConsDay() +
+                        getResFConsDay());
+        }
+    }
+    
+    public void dayPasses() {
+        setAge(getAge() + 1);
+        setConsInDay(0);
+        setLivingConsDay(0);
+        setResBConsDay(0);
+        setResFConsDay(0);
+    }
     
     public double eat(double availRes) {
         if (mature) {
@@ -133,9 +199,65 @@ public class Sheep {
             return eatImmature(availRes);
         }
     }
-
+    
     public double eatMatureNP(double availRes) {
-        setAge(getAge() + 1);
+        // how much resource is consumed during this iteration
+        double resCons = Math.min(availRes, getConsInDay());
+
+        if (resCons > LIV_CONS - getLivingConsDay()) {
+            // how much resource is left for reserves
+            double resB = resCons - (LIV_CONS - getConsInDay());
+            
+            reserveFill += resB;
+        } else {
+            setLivingConsDay(getLivingConsDay() + resCons);
+        }
+
+        updConsInDay();
+        
+        return resCons;
+    }
+    
+    
+    public double eatImmature(double availRes) {
+        double resCons = Math.min(availRes, getConsInDay());
+        double resB = 0;
+        
+        if (resCons < LIV_CONS - getLivingConsDay()) {
+            setLivingConsDay(getLivingConsDay() + resCons);
+        } else {
+            if (resCons < R_BUILD_PER_DAY_CONS - resBConsDay) {
+                resB = resCons - (LIV_CONS - getLivingConsDay());
+                setLivingConsDay(LIV_CONS);
+                setResBConsDay(getResBConsDay() + resB);
+            } else {
+                if (resCons < DC - getConsInDay()) {
+                    resB = resCons - (LIV_CONS - getLivingConsDay());
+                    setLivingConsDay(LIV_CONS);
+                    resB -= R_BUILD_PER_DAY_CONS - getResBConsDay();
+                    setResBConsDay(R_BUILD_PER_DAY_CONS);
+                    setReserveFill(getReserveFill() + resB);
+                }
+            }
+        }
+        
+        updConsInDay();
+        
+        return resCons;
+    }
+    
+    public void matureNPReserveSpend() {
+        if (LIV_CONS < getLivingConsDay()) {
+            if (LIV_CONS - getLivingConsDay() <= getReserveFill()) {
+                setReserveFill(getReserveFill() -
+                        (LIV_CONS - getLivingConsDay()));
+            } else {
+                setAlive(false);
+            }
+        }
+    }
+/*
+    public double eatMatureNP(double availRes) {
         if (availRes < LIV_CONS) {
             if (getReserveFill() < LIV_CONS - availRes) {
                 alive = false;
@@ -164,13 +286,13 @@ public class Sheep {
         }
         
         return availRes;
-        /* ???
+        ???
         throw new Exception("The quantity of available resource " + availRes +
-                " is not in the list!");*/
+                " is not in the list!");
     }
-    
+*/
+/*    
     public double eatImmature(double availRes) {
-        setAge(getAge() + 1);
         if (availRes < LIV_CONS) {
             setReserveCap(getReserveCap() + 0);
             if (getReserveFill() < LIV_CONS - availRes) {
@@ -207,11 +329,12 @@ public class Sheep {
         
         return availRes;
         
-        /* ??? - how to handle this Exception?
+        ??? - how to handle this Exception?
         throw new Exception("The quantity of available resource " + availRes +
                 " is not in the " +
-                "list!");*/
+                "list!");
     }
+*/
     
     @Override
     public String toString() {

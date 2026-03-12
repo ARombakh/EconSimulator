@@ -38,7 +38,7 @@ public class EcoSystem {
         return false;
     }
     
-    public boolean feedSheep(Sheep sheep, GrassAcre grassAcre) {
+    public boolean feedOneSheep(Sheep sheep, GrassAcre grassAcre) {
         double eaten = sheep.eat(grassAcre.availRes());
         if (eaten == 0) {
             return false;
@@ -46,5 +46,35 @@ public class EcoSystem {
             grassAcre.resourceEaten(eaten);
             return true;
         }
+    }
+    
+    public void feedAllSheep() {
+        for (Sheep sheep1 : sheep) {
+            for (GrassAcre grass1 : grass) {
+                feedOneSheep(sheep1, grass1);
+                
+                System.out.printf("Feeding sheep:\n");   // Debug
+                System.out.println(sheep1);   // Debug
+                System.out.println(grass1);   // Debug
+            }
+        }
+    }
+    
+    @Override
+    public String toString() {
+        String output = "";
+        
+        for (int i = 0; i < sheep.size(); i++) {
+            output += "Sheep no " + i + "\n";
+            
+            output += sheep.get(i) + "\n";
+        }
+        
+        for (int i = 0; i < grass.size(); i++) {
+            output += "Grass no " + i + "\n";
+            
+            output += grass.get(i) + "\n";
+        }        
+        return output;
     }
 }
