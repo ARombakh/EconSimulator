@@ -126,7 +126,7 @@ public class Sheep {
         this.alive = alive;
     }
     
-    public double eat(double availRes) throws Exception {
+    public double eat(double availRes) {
         if (mature) {
             return eatMatureNP(availRes);
         } else {
@@ -134,7 +134,7 @@ public class Sheep {
         }
     }
 
-    public double eatMatureNP(double availRes) throws Exception {
+    public double eatMatureNP(double availRes) {
         setAge(getAge() + 1);
         if (availRes < LIV_CONS) {
             if (getReserveFill() < LIV_CONS - availRes) {
@@ -163,12 +163,13 @@ public class Sheep {
             return LIV_CONS + availResB;
         }
         
-        throw new Exception("The number of available resource " + availRes +
-                " is not in the " +
-                "list!");
+        return availRes;
+        /* ???
+        throw new Exception("The quantity of available resource " + availRes +
+                " is not in the list!");*/
     }
     
-    public double eatImmature(double availRes) throws Exception {
+    public double eatImmature(double availRes) {
         setAge(getAge() + 1);
         if (availRes < LIV_CONS) {
             setReserveCap(getReserveCap() + 0);
@@ -204,9 +205,12 @@ public class Sheep {
             return availRes;
         }
         
-        throw new Exception("The number of available resource " + availRes +
+        return availRes;
+        
+        /* ??? - how to handle this Exception?
+        throw new Exception("The quantity of available resource " + availRes +
                 " is not in the " +
-                "list!");
+                "list!");*/
     }
     
     @Override
@@ -217,7 +221,7 @@ public class Sheep {
                 "ReserveCap " + getReserveCap() + "\n" +
                 "ReserveFill " + getReserveFill() + "\n";
     }
-    
+    /*
     public static void main(String[] args) throws Exception {
         Sheep sheep = new Sheep();
         
@@ -252,5 +256,5 @@ public class Sheep {
             System.out.println("Consume " + sheep.eat(2.0) + " grass\n");
             System.out.println(ga);
         }
-    }
+    }*/
 }
