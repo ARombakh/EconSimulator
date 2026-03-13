@@ -51,6 +51,9 @@ public class EcoSystem {
     public void feedAllSheep() {
         for (Sheep sheep1 : sheep) {
             for (GrassAcre grass1 : grass) {
+                System.out.printf(sheep1 + "\n");   // Debug
+                System.out.println(grass1);   // Debug
+                
                 feedOneSheep(sheep1, grass1);
                 
                 System.out.printf("Feeding sheep:\n");   // Debug
@@ -60,19 +63,25 @@ public class EcoSystem {
         }
     }
     
+    public void passDay() {
+        for (Sheep sheep1 : sheep) {
+            sheep1.dayPasses();
+        }
+        
+        for (GrassAcre grassAcre : grass) {
+            grassAcre.dayPasses();
+        }
+    }
+    
     @Override
     public String toString() {
         String output = "";
         
-        for (int i = 0; i < sheep.size(); i++) {
-            output += "Sheep no " + i + "\n";
-            
+        for (int i = 0; i < sheep.size(); i++) {            
             output += sheep.get(i) + "\n";
         }
         
         for (int i = 0; i < grass.size(); i++) {
-            output += "Grass no " + i + "\n";
-            
             output += grass.get(i) + "\n";
         }        
         return output;

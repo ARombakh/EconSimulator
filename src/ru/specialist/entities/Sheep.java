@@ -8,7 +8,7 @@ package ru.specialist.entities;
  *
  * @author artyom
  */
-public class Sheep {
+public class Sheep implements ChangeDay {
     private static final int MAX_AGE = 1800;
     private static final int MATUR_AGE = 360;
     private static final double MAX_RESERVE_CAP = 50;  // reserve capacity
@@ -48,8 +48,9 @@ public class Sheep {
                                                 // daily fill of reserve
                                                 // for immature sheep
     
-                                                // also fill per day of resource
-                                                // capacity for immature sheep
+                                                // also per day increase of 
+                                                // resource capacity for 
+                                                // immature sheep
     
     private static final double R_BUILD_PER_DAY_CONS = R_CONS_PART * MATURE_DC -
                                                 R_FILL_PER_DAY_IMM;
@@ -58,6 +59,8 @@ public class Sheep {
                                                 // capacity for immature sheep
     
     
+    private static int sheepCounter = 0;
+    private int sheepId;
     private boolean alive;
     private boolean mature;
     private int age;    // sheep age
@@ -74,6 +77,9 @@ public class Sheep {
                                 // was consumed per day
     
     public Sheep() {
+        this.sheepId = sheepCounter;
+        sheepCounter++;
+        
         this.mature = false;
         this.alive = true;
         this.age = 0;
@@ -184,12 +190,16 @@ public class Sheep {
         }
     }
     
+    @Override
     public void dayPasses() {
         setAge(getAge() + 1);
-        setConsInDay(0);
         setLivingConsDay(0);
-        setResBConsDay(0);
+        if (!mature && getResBConsDay() == R_BUILD_PER_DAY_CONS) {
+            setReserveCap(getReserveCap() + R_FILL_PER_DAY_IMM);
+            setResBConsDay(0);
+        }
         setResFConsDay(0);
+        updConsInDay();
     }
     
     public double eat(double availRes) {
@@ -202,7 +212,7 @@ public class Sheep {
     
     public double eatMatureNP(double availRes) {
         // how much resource is consumed during this iteration
-        double resCons = Math.min(availRes, getConsInDay());
+        double resCons = Math.min(availRes, DC - getConsInDay());
 
         if (resCons > LIV_CONS - getLivingConsDay()) {
             // how much resource is left for reserves
@@ -220,7 +230,7 @@ public class Sheep {
     
     
     public double eatImmature(double availRes) {
-        double resCons = Math.min(availRes, getConsInDay());
+        double resCons = Math.min(availRes, DC - getConsInDay());
         double resB = 0;
         
         if (resCons < LIV_CONS - getLivingConsDay()) {
@@ -231,12 +241,13 @@ public class Sheep {
                 setLivingConsDay(LIV_CONS);
                 setResBConsDay(getResBConsDay() + resB);
             } else {
-                if (resCons < DC - getConsInDay()) {
+                if (resCons <= DC - getConsInDay()) {
                     resB = resCons - (LIV_CONS - getLivingConsDay());
                     setLivingConsDay(LIV_CONS);
                     resB -= R_BUILD_PER_DAY_CONS - getResBConsDay();
                     setResBConsDay(R_BUILD_PER_DAY_CONS);
                     setReserveFill(getReserveFill() + resB);
+                    setResFConsDay(getResFConsDay() + resB);
                 }
             }
         }
@@ -338,11 +349,16 @@ public class Sheep {
     
     @Override
     public String toString() {
-        return "Alive " + alive + "\n" +
+        return "Sheep id " + sheepId + "\n" +
+                "Alive " + alive + "\n" +
                 "Mature " + mature + "\n" +
                 "Age " + age + "\n" +
                 "ReserveCap " + getReserveCap() + "\n" +
-                "ReserveFill " + getReserveFill() + "\n";
+                "ReserveFill " + getReserveFill() + "\n" +
+                "getLivingConsDay " + getLivingConsDay() + "\n" +
+                "resBConsDay " + getResBConsDay() + "\n" +
+                "resFConsDay " + getResFConsDay() + "\n" +
+                "Total consumption per day " + getConsInDay() + "\n";
     }
     /*
     public static void main(String[] args) throws Exception {

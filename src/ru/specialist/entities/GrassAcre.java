@@ -8,14 +8,19 @@ package ru.specialist.entities;
  *
  * @author artyom
  */
-public class GrassAcre {
+public class GrassAcre implements ChangeDay {
     private static final double maxLen = 3;     // maximum length that grass can
                                                 // grow to
     private static final double minLenToEat = 1;    // minimal length where
                                                     // sheep can eat grass
+    private static int grassCounter = 0;
+    private int grassId;
     private double length;  // length of grass
+    
 
     public GrassAcre(double len) {
+        this.grassId = grassCounter;
+        grassCounter++;
         setLength(len);
     }
     
@@ -35,6 +40,11 @@ public class GrassAcre {
         setLength(getLength() + 1);
     }
     
+    @Override
+    public void dayPasses() {
+        increment();
+    }
+    
     public double availRes() {
         return length - minLenToEat > 0 ? length - minLenToEat : 0;
     }
@@ -45,6 +55,7 @@ public class GrassAcre {
     
     @Override
     public String toString() {
-        return "Grass length " + getLength() + "\n";
+        return "Grass id " + grassId + "\n" +
+                "Grass length " + getLength() + "\n";
     }
 }

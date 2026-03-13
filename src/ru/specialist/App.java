@@ -10,7 +10,7 @@ package ru.specialist;
  */
 public class App {
     public static void main(String[] args) {
-        EcoSystem system = new EcoSystem(3, 4);
+        EcoSystem system = new EcoSystem(1, 1);
         /*
         System.out.println(system.sheep.get(0));
         System.out.println(system.grass.get(0));
@@ -34,10 +34,16 @@ public class App {
         System.out.println(system.grass.get(0));*/
         
         System.out.println(system);
-        
+
         system.feedAllSheep();
         
         System.out.println("All sheep are fed\n");
+        
+        System.out.println(system);
+        
+        system.passDay();
+        
+        System.out.println("Day passed\n");
         
         System.out.println(system);
     }
