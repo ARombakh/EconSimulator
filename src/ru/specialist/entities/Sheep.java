@@ -131,19 +131,19 @@ public class Sheep implements ChangeDay {
     public void setAge(int age) {
         this.age = age;
         // ??? should we check is-flags here?
-        if (this.age >= MATUR_AGE && isMature() == false) {
+        /*if (this.age >= MATUR_AGE && isMature() == false) {
             setMature(true);
-        }
+        }*/
         
         if (this.age >= MAX_AGE && isAlive() == true) {
             setAlive(false);
         }
     }
 
-    public void setReserveCap(double reserveCap) {
+    public void setReserveCap(double reserveCap) {        
         if (reserveCap > MAX_RESERVE_CAP) {
             this.reserveCap = MAX_RESERVE_CAP;
-            this.mature = true;
+            setMature(true);
         } else {
             this.reserveCap = reserveCap;
         }
@@ -198,7 +198,7 @@ public class Sheep implements ChangeDay {
         } else {
             setResFConsDay(getResFConsDay() - (LIV_CONS - getLivingConsDay()));
             setAge(getAge() + 1);
-            if (!mature && getResBConsDay() == R_BUILD_PER_DAY_CONS) {
+            if (!isMature() && (getResBConsDay() == R_BUILD_PER_DAY_CONS)) {
                 setReserveCap(getReserveCap() + R_FILL_PER_DAY_IMM);
                 setResBConsDay(0);
             }
