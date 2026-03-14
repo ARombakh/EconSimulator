@@ -33,18 +33,18 @@ public class App {
         System.out.println(system.sheep.get(1));
         System.out.println(system.grass.get(0));*/
         
-        System.out.println(system);
+        while (!system.sheep.getFirst().isMature()) {            
+            System.out.println(system);
 
-        system.feedAllSheep();
-        
-        System.out.println("All sheep are fed\n");
-        
-        System.out.println(system);
-        
-        system.passDay();
-        
-        System.out.println("Day passed\n");
-        
-        System.out.println(system);
+            system.feedAllSheep();
+
+            System.out.println("All sheep are fed\n");
+
+            System.out.println(system);
+
+            system.passDay();
+
+            System.out.println(system);
+        }
     }
 }

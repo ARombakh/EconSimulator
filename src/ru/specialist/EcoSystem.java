@@ -71,6 +71,8 @@ public class EcoSystem {
         for (GrassAcre grassAcre : grass) {
             grassAcre.dayPasses();
         }
+        
+        System.out.println("Day passed");
     }
     
     @Override

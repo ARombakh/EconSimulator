@@ -150,8 +150,8 @@ public class Sheep implements ChangeDay {
     }
 
     public void setReserveFill(double reserveFill) {
-        if (reserveFill > MAX_RESERVE_CAP) {
-            this.reserveFill = MAX_RESERVE_CAP;
+        if (reserveFill > reserveCap) {
+            this.reserveFill = reserveCap;
         } else {
             this.reserveFill = reserveFill;
         }
@@ -192,12 +192,19 @@ public class Sheep implements ChangeDay {
     
     @Override
     public void dayPasses() {
-        setAge(getAge() + 1);
-        setLivingConsDay(0);
-        if (!mature && getResBConsDay() == R_BUILD_PER_DAY_CONS) {
-            setReserveCap(getReserveCap() + R_FILL_PER_DAY_IMM);
+        if (getResFConsDay() < LIV_CONS - getLivingConsDay()) {
+            alive = false;
             setResBConsDay(0);
+        } else {
+            setResFConsDay(getResFConsDay() - (LIV_CONS - getLivingConsDay()));
+            setAge(getAge() + 1);
+            if (!mature && getResBConsDay() == R_BUILD_PER_DAY_CONS) {
+                setReserveCap(getReserveCap() + R_FILL_PER_DAY_IMM);
+                setResBConsDay(0);
+            }
+            setReserveFill(getReserveFill() + getResFConsDay());
         }
+        setLivingConsDay(0);
         setResFConsDay(0);
         updConsInDay();
     }
@@ -233,20 +240,27 @@ public class Sheep implements ChangeDay {
         double resCons = Math.min(availRes, DC - getConsInDay());
         double resB = 0;
         
-        if (resCons < LIV_CONS - getLivingConsDay()) {
+        // Deficit of consumption required for living per day
+        double LivingConsDayDeficit = LIV_CONS - getLivingConsDay();
+        if (resCons < LivingConsDayDeficit) {
             setLivingConsDay(getLivingConsDay() + resCons);
         } else {
-            if (resCons < R_BUILD_PER_DAY_CONS - resBConsDay) {
-                resB = resCons - (LIV_CONS - getLivingConsDay());
+            // Deficit of consumption required for reserve building per day
+            double resBConsDayDeficit = R_BUILD_PER_DAY_CONS - getResBConsDay();
+            if (resCons < resBConsDayDeficit + LivingConsDayDeficit) {
+                resB = resCons - LivingConsDayDeficit;
                 setLivingConsDay(LIV_CONS);
                 setResBConsDay(getResBConsDay() + resB);
             } else {
-                if (resCons <= DC - getConsInDay()) {
-                    resB = resCons - (LIV_CONS - getLivingConsDay());
+                // Deficit of consumption required for reserve filling per day
+                double ResFConsDayLiving = R_FILL_PER_DAY_IMM -
+                        getResFConsDay();
+                if (resCons <= resBConsDayDeficit + LivingConsDayDeficit +
+                        ResFConsDayLiving) {
+                    resB = resCons - (LivingConsDayDeficit);
                     setLivingConsDay(LIV_CONS);
-                    resB -= R_BUILD_PER_DAY_CONS - getResBConsDay();
+                    resB -= resBConsDayDeficit;
                     setResBConsDay(R_BUILD_PER_DAY_CONS);
-                    setReserveFill(getReserveFill() + resB);
                     setResFConsDay(getResFConsDay() + resB);
                 }
             }
@@ -267,85 +281,6 @@ public class Sheep implements ChangeDay {
             }
         }
     }
-/*
-    public double eatMatureNP(double availRes) {
-        if (availRes < LIV_CONS) {
-            if (getReserveFill() < LIV_CONS - availRes) {
-                alive = false;
-                return availRes;
-            } else {
-                setReserveFill(getReserveFill() - (LIV_CONS - availRes));
-                return availRes;
-            }
-        }
-        
-        if (availRes < LIV_CONS + R_CONS) {
-            setReserveFill(getReserveFill() + LIV_CONS - availRes);
-            return availRes;
-        }
-        
-        // ??? doubtful practice
-        if (availRes > LIV_CONS + R_CONS) {
-            availRes = LIV_CONS + R_CONS;            
-        }
-        
-        if (availRes <= LIV_CONS + R_CONS) {
-            double availResB = Math.min(reserveCap - reserveFill,
-                    availRes - LIV_CONS);
-            setReserveFill(getReserveFill() + availResB);
-            return LIV_CONS + availResB;
-        }
-        
-        return availRes;
-        ???
-        throw new Exception("The quantity of available resource " + availRes +
-                " is not in the list!");
-    }
-*/
-/*    
-    public double eatImmature(double availRes) {
-        if (availRes < LIV_CONS) {
-            setReserveCap(getReserveCap() + 0);
-            if (getReserveFill() < LIV_CONS - availRes) {
-                alive = false;
-                return availRes;
-            } else {
-                setReserveFill(getReserveFill() - (LIV_CONS - availRes));
-                return availRes;
-            }
-        }
-        
-        if (availRes < R_BUILD_PER_DAY_CONS + LIV_CONS) {
-            setReserveCap(getReserveCap() + 0);
-            double factCons = availRes - LIV_CONS;
-            double toRes = Math.min(factCons, getReserveCap() -
-                    getReserveFill());
-            setReserveFill(getReserveFill() + toRes);
-            factCons -= toRes;
-            availRes -= factCons;
-            return availRes;
-        }
-
-        // ??? doubtful practice
-        if (availRes > LIV_CONS + R_CONS) {
-            availRes = LIV_CONS + R_CONS;
-        }
-        
-        if (availRes <= LIV_CONS + R_CONS) {
-            setReserveCap(getReserveCap() + R_FILL_PER_DAY_IMM);
-            setReserveFill(getReserveFill() + availRes - LIV_CONS -
-                    R_BUILD_PER_DAY_CONS);
-            return availRes;
-        }
-        
-        return availRes;
-        
-        ??? - how to handle this Exception?
-        throw new Exception("The quantity of available resource " + availRes +
-                " is not in the " +
-                "list!");
-    }
-*/
     
     @Override
     public String toString() {
@@ -357,43 +292,6 @@ public class Sheep implements ChangeDay {
                 "ReserveFill " + getReserveFill() + "\n" +
                 "getLivingConsDay " + getLivingConsDay() + "\n" +
                 "resBConsDay " + getResBConsDay() + "\n" +
-                "resFConsDay " + getResFConsDay() + "\n" +
-                "Total consumption per day " + getConsInDay() + "\n";
+                "resFConsDay " + getResFConsDay() + "\n";
     }
-    /*
-    public static void main(String[] args) throws Exception {
-        Sheep sheep = new Sheep();
-        
-        int i;
-        int j;
-        int k;
-        
-        GrassAcre ga = new GrassAcre(3);
-        
-        for (i = 0; i < 370; i++) {
-            ga.increment();
-            System.out.println("Day " + i + "\n" + ga);
-            System.out.println("Day " + i + "\n" + sheep);
-            double eaten = sheep.eat(ga.availRes());
-            System.out.println("Consume " + eaten + " grass\n");
-            ga.resourceEaten(eaten);
-            System.out.println(ga);
-        }
-        
-        System.out.println("==================================================");
-        
-        for (j = 0; j < 10; j++) {
-            System.out.println("Day " + (i + j) + "\n" + sheep.toString());
-            System.out.println("Consume " + sheep.eat(0.4) + " grass\n");
-            System.out.println(ga);
-        }        
-        
-        System.out.println("==================================================");
-        
-        for (k = 0; k < 50; k++) {
-            System.out.println("Day " + (i + j + k) + "\n" + sheep.toString());
-            System.out.println("Consume " + sheep.eat(2.0) + " grass\n");
-            System.out.println(ga);
-        }
-    }*/
 }
