@@ -4,13 +4,15 @@
  */
 package ru.specialist;
 
+import ru.specialist.entities.Sheep;
+
 /**
  *
  * @author artyom
  */
 public class App {
     public static void main(String[] args) {
-        EcoSystem ecoSystem = new EcoSystem(4, 2);
+        EcoSystem ecoSystem = new EcoSystem(4, 1);
         /*
         System.out.println(system.sheep.get(0));
         System.out.println(system.grass.get(0));
@@ -35,7 +37,9 @@ public class App {
 
         System.out.println("Sheep quantity " + ecoSystem.sheep.size());
         
-        while (ecoSystem.sheep.getFirst().getAge() < 400) {
+        while (!ecoSystem.sheep.getFirst().isMature() ||
+                (ecoSystem.sheep.getFirst().getRfc().getReserveFill() <
+                ecoSystem.sheep.getFirst().getRfc().getReserveCap())) {
 //            System.out.println(ecoSystem);
 
             ecoSystem.feedAllSheep();
@@ -47,6 +51,10 @@ public class App {
             ecoSystem.dayPasses();
 
 //            System.out.println(ecoSystem);
+
+            if (ecoSystem.isDead()) {
+                break;
+            }
         }
         
         System.out.println("Sheep quantity " + ecoSystem.sheep.size());
