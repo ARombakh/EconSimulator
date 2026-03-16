@@ -5,7 +5,6 @@
 package ru.specialist;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 import ru.specialist.entities.ChangeDay;
 import ru.specialist.entities.GrassAcre;
@@ -31,13 +30,7 @@ public class EcoSystem implements ChangeDay {
     
     // function to test if all the sheep are dead
     public boolean isDead() {
-        for (Sheep sheep1 : sheep) {
-            if (sheep1.isAlive() == true) {
-                return true;
-            }
-        }
-        
-        return false;
+        return sheep.size() == 0;
     }
     
     public boolean feedOneSheep(Sheep sheep, GrassAcre grassAcre) {
