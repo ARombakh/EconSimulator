@@ -9,42 +9,42 @@ package ru.specialist.entities;
  * @author artyom
  */
 public class Sheep implements ChangeDay {
-    private static final int MAX_AGE = 1800;
-    private static final int MATUR_AGE = 360;
-    private static final double MAX_RESERVE_CAP = 50;  // reserve capacity
+    public static final int MAX_AGE = 1800;
+    public static final int MATUR_AGE = 360;
+    public static final double MAX_RESERVE_CAP = 50;  // reserve capacity
 
-    private static final double PREG_RESERVE_CAP = 15;  // pregnancy reserve 
+    public static final double PREG_RESERVE_CAP = 15;  // pregnancy reserve 
                                                     // capacity
     
-    private static final double MATURE_DC = 2;   // daily consumption of mature
+    public static final double MATURE_DC = 2;   // daily consumption of mature
                                                 // pregnant sheep
     
-    private static final double DC = 1.7;   // daily consumption of mature and
+    public static final double DC = 1.7;   // daily consumption of mature and
                                             // immature sheep
     
-    private static final double LIV_CONS_PART = .35;  // part of consumption 
+    public static final double LIV_CONS_PART = .35;  // part of consumption 
                                                     // spend on living
     
-    private static final double PREG_R_CONS_PART = .15;  // part of consumption 
+    public static final double PREG_R_CONS_PART = .15;  // part of consumption 
                                                     // spend on filling
                                                     // pregnancy reserve
     
-    private static final double R_CONS_PART = .50;  // part of consumption
+    public static final double R_CONS_PART = .50;  // part of consumption
                                                     // spend on filling reserve
     
-    private static final double LIV_CONS = LIV_CONS_PART * MATURE_DC;  
+    public static final double LIV_CONS = LIV_CONS_PART * MATURE_DC;  
                                                     // consumption spend on 
                                                     // living
     
-    private static final double PREG_R_CONS = PREG_R_CONS_PART * MATURE_DC;  
+    public static final double PREG_R_CONS = PREG_R_CONS_PART * MATURE_DC;  
                                                     // consumption spend on 
                                                     // filling pregnancy reserve
 
-    private static final double R_CONS = R_CONS_PART * MATURE_DC;  // consumption
+    public static final double R_CONS = R_CONS_PART * MATURE_DC;  // consumption
                                                     //  spend on filling
                                                     // reserve
 
-    private static final double R_FILL_PER_DAY_IMM = MAX_RESERVE_CAP / MATUR_AGE;
+    public static final double R_FILL_PER_DAY_IMM = MAX_RESERVE_CAP / MATUR_AGE;
                                                 // daily fill of reserve
                                                 // for immature sheep
     
@@ -52,7 +52,7 @@ public class Sheep implements ChangeDay {
                                                 // resource capacity for 
                                                 // immature sheep
     
-    private static final double R_BUILD_PER_DAY_CONS = R_CONS_PART * MATURE_DC -
+    public static final double R_BUILD_PER_DAY_CONS = R_CONS_PART * MATURE_DC -
                                                 R_FILL_PER_DAY_IMM;
                                                 // daily consumption for 
                                                 // buildup of reserve
@@ -121,9 +121,9 @@ public class Sheep implements ChangeDay {
     public void setAge(int age) {
         this.age = age;
         // ??? should we check is-flags here?
-        /*if (this.age >= MATUR_AGE && isMature() == false) {
+        if (this.age >= MATUR_AGE && isMature() == false) {
             setMature(true);
-        }*/
+        }
         
         if (this.age >= MAX_AGE && isAlive() == true) {
             setAlive(false);
