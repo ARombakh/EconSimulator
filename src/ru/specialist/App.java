@@ -10,7 +10,7 @@ package ru.specialist;
  */
 public class App {
     public static void main(String[] args) {
-        EcoSystem system = new EcoSystem(1, 1);
+        EcoSystem ecoSystem = new EcoSystem(1, 2);
         /*
         System.out.println(system.sheep.get(0));
         System.out.println(system.grass.get(0));
@@ -33,18 +33,18 @@ public class App {
         System.out.println(system.sheep.get(1));
         System.out.println(system.grass.get(0));*/
         
-        while (!system.sheep.getFirst().isMature()) {            
-            System.out.println(system);
+        while (ecoSystem.sheep.getFirst().getAge() < 400) {
+            System.out.println(ecoSystem);
 
-            system.feedAllSheep();
+            ecoSystem.feedAllSheep();
 
             System.out.println("All sheep are fed\n");
 
-            System.out.println(system);
+            System.out.println(ecoSystem);
 
-            system.passDay();
+            ecoSystem.passDay();
 
-            System.out.println(system);
+            System.out.println(ecoSystem);
         }
     }
 }

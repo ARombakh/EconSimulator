@@ -12,7 +12,7 @@ public class Sheep implements ChangeDay {
     private static final int MAX_AGE = 1800;
     private static final int MATUR_AGE = 360;
     private static final double MAX_RESERVE_CAP = 50;  // reserve capacity
-    
+
     private static final double PREG_RESERVE_CAP = 15;  // pregnancy reserve 
                                                     // capacity
     
@@ -22,8 +22,8 @@ public class Sheep implements ChangeDay {
     private static final double DC = 1.7;   // daily consumption of mature and
                                             // immature sheep
     
-    private static final double LIV_CONS_PART = .35;  // part of consumption spend
-                                                    // on living
+    private static final double LIV_CONS_PART = .35;  // part of consumption 
+                                                    // spend on living
     
     private static final double PREG_R_CONS_PART = .15;  // part of consumption 
                                                     // spend on filling
@@ -64,17 +64,10 @@ public class Sheep implements ChangeDay {
     private boolean alive;
     private boolean mature;
     private int age;    // sheep age
-    private double reserveCap;  // sheep reserve capacity
-    private double reserveFill; // how much of resoruce is filled
     
-    private double consInDay;   // how much of resource totally was consumed 
-                                    // per day
-    private double livingConsDay;   // how much of resource for living was 
-                                    // consumed per day
-    private double resBConsDay; // how much of resource for building reserves
-                                // was consumed per day
-    private double resFConsDay; // how much of resource for filling reserves
-                                // was consumed per day
+    private LivingContainer lc;
+    private ResBuildContainer rbc;
+    private ResFillContainer rfc;
     
     public Sheep() {
         this.sheepId = sheepCounter;
@@ -83,41 +76,26 @@ public class Sheep implements ChangeDay {
         this.mature = false;
         this.alive = true;
         this.age = 0;
-        this.reserveCap = 0;
-        this.reserveFill = 0;
-        
-        this.consInDay = 0;
-        this.livingConsDay = 0;
-        this.resBConsDay = 0;
-        this.resFConsDay = 0;
+
+        setLc(new LivingContainer());
+        setRbc(new ResBuildContainer());
+        setRfc(new ResFillContainer());
     }
 
-    public double getConsInDay() {
-        return consInDay;
+    public LivingContainer getLc() {
+        return lc;
     }
 
-    public double getLivingConsDay() {
-        return livingConsDay;
+    public ResBuildContainer getRbc() {
+        return rbc;
     }
 
-    public double getResBConsDay() {
-        return resBConsDay;
-    }
-
-    public double getResFConsDay() {
-        return resFConsDay;
+    public ResFillContainer getRfc() {
+        return rfc;
     }
 
     public int getAge() {
         return age;
-    }
-
-    public double getReserveCap() {
-        return reserveCap;
-    }
-
-    public double getReserveFill() {
-        return reserveFill;
     }
 
     public boolean isMature() {
@@ -126,6 +104,18 @@ public class Sheep implements ChangeDay {
 
     public boolean isAlive() {
         return alive;
+    }
+
+    public void setLc(LivingContainer lc) {
+        this.lc = lc;
+    }
+
+    public void setRbc(ResBuildContainer rbc) {
+        this.rbc = rbc;
+    }
+
+    public void setRfc(ResFillContainer rfc) {
+        this.rfc = rfc;
     }
 
     public void setAge(int age) {
@@ -140,23 +130,6 @@ public class Sheep implements ChangeDay {
         }
     }
 
-    public void setReserveCap(double reserveCap) {        
-        if (reserveCap > MAX_RESERVE_CAP) {
-            this.reserveCap = MAX_RESERVE_CAP;
-            setMature(true);
-        } else {
-            this.reserveCap = reserveCap;
-        }
-    }
-
-    public void setReserveFill(double reserveFill) {
-        if (reserveFill > reserveCap) {
-            this.reserveFill = reserveCap;
-        } else {
-            this.reserveFill = reserveFill;
-        }
-    }
-
     public void setMature(boolean mature) {
         this.mature = mature;
     }
@@ -164,121 +137,213 @@ public class Sheep implements ChangeDay {
     public void setAlive(boolean alive) {
         this.alive = alive;
     }
-
-    public void setConsInDay(double consInDay) {
-        this.consInDay = consInDay;
-    }
-
-    public void setLivingConsDay(double livingConsDay) {
-        this.livingConsDay = livingConsDay;
-    }
-
-    public void setResBConsDay(double resBConsDay) {
-        this.resBConsDay = resBConsDay;
-    }
-
-    public void setResFConsDay(double resFConsDay) {
-        this.resFConsDay = resFConsDay;
-    }
     
-    public void updConsInDay() {
-        if (mature) {
-            setConsInDay(getLivingConsDay() + getResFConsDay());
-        } else {
-            setConsInDay(getLivingConsDay() + getResBConsDay() +
-                        getResFConsDay());
+    public double eat(double availRes) {
+        double eatenRes = 0;
+        
+        eatenRes += this.lc.fill(availRes - eatenRes);
+        if (availRes - eatenRes == 0) {
+            return eatenRes;
         }
+        
+        if (!isMature()) {
+            eatenRes += this.rbc.fill(availRes - eatenRes);
+            if (availRes - eatenRes == 0) {
+                return eatenRes;
+            }            
+        }        
+
+        eatenRes += this.rfc.fill(availRes - eatenRes);
+                
+        return eatenRes;
     }
     
     @Override
     public void dayPasses() {
-        if (getResFConsDay() < LIV_CONS - getLivingConsDay()) {
-            alive = false;
-            setResBConsDay(0);
-        } else {
-            setResFConsDay(getResFConsDay() - (LIV_CONS - getLivingConsDay()));
-            setAge(getAge() + 1);
-            if (!isMature() && (getResBConsDay() == R_BUILD_PER_DAY_CONS)) {
-                setReserveCap(getReserveCap() + R_FILL_PER_DAY_IMM);
-                setResBConsDay(0);
-            }
-            setReserveFill(getReserveFill() + getResFConsDay());
-        }
-        setLivingConsDay(0);
-        setResFConsDay(0);
-        updConsInDay();
+        lc.fill(rfc.extract(lc.getDeficit()));
+        setAlive(lc.getDeficit() == 0);
+        lc.update();
+        rbc.update();
+        rfc.update();
+        setAge(getAge() + 1);
     }
     
-    public double eat(double availRes) {
-        if (mature) {
-            return eatMatureNP(availRes);
-        } else {
-            return eatImmature(availRes);
-        }
-    }
-    
-    public double eatMatureNP(double availRes) {
-        // how much resource is consumed during this iteration
-        double resCons = Math.min(availRes, DC - getConsInDay());
-
-        if (resCons > LIV_CONS - getLivingConsDay()) {
-            // how much resource is left for reserves
-            double resB = resCons - (LIV_CONS - getConsInDay());
-            
-            reserveFill += resB;
-        } else {
-            setLivingConsDay(getLivingConsDay() + resCons);
+    public class LivingContainer {
+        private double deficit;
+        
+        public LivingContainer() {
+            update();
         }
 
-        updConsInDay();
-        
-        return resCons;
-    }
-    
-    
-    public double eatImmature(double availRes) {
-        double resCons = Math.min(availRes, DC - getConsInDay());
-        double resB = 0;
-        
-        // Deficit of consumption required for living per day
-        double LivingConsDayDeficit = LIV_CONS - getLivingConsDay();
-        if (resCons < LivingConsDayDeficit) {
-            setLivingConsDay(getLivingConsDay() + resCons);
-        } else {
-            // Deficit of consumption required for reserve building per day
-            double resBConsDayDeficit = R_BUILD_PER_DAY_CONS - getResBConsDay();
-            if (resCons < resBConsDayDeficit + LivingConsDayDeficit) {
-                resB = resCons - LivingConsDayDeficit;
-                setLivingConsDay(LIV_CONS);
-                setResBConsDay(getResBConsDay() + resB);
+        public double getDeficit() {
+            return deficit;
+        }
+
+        public void setDeficit(double deficit) {
+            this.deficit = deficit;
+        }
+
+        public double fill(double input) {
+            if (getDeficit() >= input) {
+                setDeficit(getDeficit() - input);
+                return input;
             } else {
-                // Deficit of consumption required for reserve filling per day
-                double ResFConsDayLiving = R_FILL_PER_DAY_IMM -
-                        getResFConsDay();
-                if (resCons <= resBConsDayDeficit + LivingConsDayDeficit +
-                        ResFConsDayLiving) {
-                    resB = resCons - (LivingConsDayDeficit);
-                    setLivingConsDay(LIV_CONS);
-                    resB -= resBConsDayDeficit;
-                    setResBConsDay(R_BUILD_PER_DAY_CONS);
-                    setResFConsDay(getResFConsDay() + resB);
-                }
+                double output = getDeficit();
+                setDeficit(0);
+                return output;
             }
         }
         
-        updConsInDay();
+        public void update() {
+            setDeficit(LIV_CONS);
+        }
         
-        return resCons;
+        @Override
+        public String toString() {
+            return "Daily living consumption " + LIV_CONS + "\n" +
+                    "Deficit " + getDeficit() + "\n";
+        }
     }
     
-    public void matureNPReserveSpend() {
-        if (LIV_CONS < getLivingConsDay()) {
-            if (LIV_CONS - getLivingConsDay() <= getReserveFill()) {
-                setReserveFill(getReserveFill() -
-                        (LIV_CONS - getLivingConsDay()));
+    public class ResBuildContainer {
+        private double deficit;
+        private boolean todayRCUpdated;
+        
+        public ResBuildContainer() {
+            setTodayRCUpdated(true);
+            update();
+        }
+
+        public double getDeficit() {
+            return deficit;
+        }
+
+        public boolean isTodayRCUpdated() {
+            return todayRCUpdated;
+        }
+
+        public void setDeficit(double deficit) {
+            this.deficit = deficit;
+        }
+
+        public void setTodayRCUpdated(boolean todayRCUpdated) {
+            this.todayRCUpdated = todayRCUpdated;
+        }
+
+        public double fill(double input) {
+            if (getDeficit() >= input) {
+                setDeficit(getDeficit() - input);
+                return input;
             } else {
-                setAlive(false);
+                double output = getDeficit();
+                setDeficit(0);
+                rfc.setReserveCap(rfc.getReserveCap() +
+                        R_FILL_PER_DAY_IMM);
+                setTodayRCUpdated(true);
+                return output;
             }
+        }
+        
+        public void update() {
+            if (todayRCUpdated) {
+                setDeficit(R_BUILD_PER_DAY_CONS);
+                setTodayRCUpdated(false);
+            }
+        }
+        
+        @Override
+        public String toString() {
+            return "Daily consumtion reserve building " + R_BUILD_PER_DAY_CONS +
+                    "\n" +
+                    "Deficit " + getDeficit() + "\n" +
+                    "Today RC updated " + isTodayRCUpdated() + "\n";
+        }
+    }
+    
+    public class ResFillContainer {
+        private double deficit;
+        
+        private double reserveCap;
+        private double reserveFill;
+        
+        public ResFillContainer() {
+            setReserveFill(0);
+            setReserveCap(0);
+            update();
+        }
+
+        public double getDeficit() {
+            return deficit;
+        }
+
+        public double getReserveCap() {
+            return reserveCap;
+        }
+
+        public double getReserveFill() {
+            return reserveFill;
+        }
+
+        public void setDeficit(double deficit) {
+            this.deficit = deficit;
+        }
+        
+        public void setReserveCap(double reserveCap) {        
+            if (reserveCap > MAX_RESERVE_CAP) {
+                this.reserveCap = MAX_RESERVE_CAP;
+                setMature(true);
+            } else {
+                this.reserveCap = reserveCap;
+            }
+        }
+
+        public void setReserveFill(double reserveFill) {
+            this.reserveFill = reserveFill;
+        }
+
+        // Least of two numbers:
+        //  filling up to reserve capacity
+        //  deficit per day
+        public double minDeficit() {
+            return Math.min(getDeficit(), getReserveCap() -
+                    getReserveFill());
+        }
+        
+        public double fill(double input) {
+            if (getDeficit() >= input) {
+                setDeficit(getDeficit() - input);
+                setReserveFill(getReserveFill() + input);
+                return input;
+            } else {
+                double minDeficit = minDeficit();
+                setDeficit(getDeficit() - minDeficit);
+                setReserveFill(getReserveFill() + minDeficit);
+                return minDeficit;
+            }
+        }
+        
+        public double extract(double needed) {
+            if (needed >= getReserveFill()) {
+                double output = getReserveFill();
+                setReserveFill(0);
+                return output;
+            } else {
+                setReserveFill(getReserveFill() - needed);
+                return needed;
+            }
+        }
+        
+        public void update() {
+            setDeficit(R_FILL_PER_DAY_IMM);
+        }
+        
+        @Override
+        public String toString() {
+            return "Max consumption for filling daily " + R_FILL_PER_DAY_IMM +
+                    "\n" +
+                    "Deficit " + getDeficit() + "\n" +
+                    "Reserve Capacity " + getReserveCap() + "\n" +
+                    "Reserve Fill " + getReserveFill() + "\n";
         }
     }
     
@@ -287,11 +352,9 @@ public class Sheep implements ChangeDay {
         return "Sheep id " + sheepId + "\n" +
                 "Alive " + alive + "\n" +
                 "Mature " + mature + "\n" +
-                "Age " + age + "\n" +
-                "ReserveCap " + getReserveCap() + "\n" +
-                "ReserveFill " + getReserveFill() + "\n" +
-                "getLivingConsDay " + getLivingConsDay() + "\n" +
-                "resBConsDay " + getResBConsDay() + "\n" +
-                "resFConsDay " + getResFConsDay() + "\n";
+                "Age " + age + "\n\n" +
+                "LC " + lc + "\n" +
+                (!mature ? "RBC " + rbc + "\n" : "") +
+                "RFC " + rfc + "\n";
     }
 }
