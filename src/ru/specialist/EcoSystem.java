@@ -5,7 +5,9 @@
 package ru.specialist;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
+import ru.specialist.entities.ChangeDay;
 import ru.specialist.entities.GrassAcre;
 import ru.specialist.entities.Sheep;
 
@@ -13,7 +15,7 @@ import ru.specialist.entities.Sheep;
  *
  * @author artyom
  */
-public class EcoSystem {
+public class EcoSystem implements ChangeDay {
     List<Sheep> sheep = new ArrayList<Sheep>();
     List<GrassAcre> grass = new ArrayList<GrassAcre>();
     
@@ -63,9 +65,14 @@ public class EcoSystem {
         }
     }
     
-    public void passDay() {
-        for (Sheep sheep1 : sheep) {
-            sheep1.dayPasses();
+    @Override
+    public void dayPasses() {        
+        for (int i = sheep.size() - 1; i >= 0; i--) {
+            sheep.get(i).dayPasses();
+            if (!sheep.get(i).isAlive()) {
+                System.out.printf("Sheep %d died\n", i);   // Debug
+                sheep.remove(i);
+            }
         }
         
         for (GrassAcre grassAcre : grass) {
