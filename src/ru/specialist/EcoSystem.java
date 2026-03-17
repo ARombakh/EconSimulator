@@ -17,6 +17,8 @@ import ru.specialist.entities.Sheep;
 public class EcoSystem implements ChangeDay {
     List<Sheep> sheep = new ArrayList<Sheep>();
     List<GrassAcre> grass = new ArrayList<GrassAcre>();
+    // One bite of grass
+    private double bite = 0.02;
     
     public EcoSystem(int sheep, int grassAcre) {
         for (int i = 0; i < sheep; i++) {
@@ -34,7 +36,7 @@ public class EcoSystem implements ChangeDay {
     }
     
     public boolean feedOneSheep(Sheep sheep, GrassAcre grassAcre) {
-        double eaten = sheep.eat(grassAcre.availRes());
+        double eaten = sheep.eat(grassAcre.resToEat(bite));
         if (eaten == 0) {
             return false;
         } else {
@@ -44,17 +46,45 @@ public class EcoSystem implements ChangeDay {
     }
     
     public void feedAllSheep() {
-        for (Sheep sheep1 : sheep) {
-            for (GrassAcre grass1 : grass) {
-                System.out.printf(sheep1 + "\n");   // Debug
-                System.out.println(grass1);   // Debug
-                
-                feedOneSheep(sheep1, grass1);
-                
-                System.out.printf("Feeding sheep:\n");   // Debug
-                System.out.println(sheep1);   // Debug
-                System.out.println(grass1);   // Debug
+        boolean eatingContinues = true;
+        // Flag that grass to eat exists
+        boolean grassExists;
+        // Flag that at least one sheep hadn't been fed
+        boolean sheepHungry;
+        
+        while (eatingContinues) {            
+            for (Sheep sheep1 : sheep) {
+                for (GrassAcre grass1 : grass) {
+                    System.out.printf(sheep1 + "\n");   // Debug
+                    System.out.println(grass1);   // Debug
+
+                    feedOneSheep(sheep1, grass1);
+
+                    System.out.printf("Feeding sheep:\n");   // Debug
+                    System.out.println(sheep1);   // Debug
+                    System.out.println(grass1);   // Debug
+                }
             }
+            
+            grassExists = false;
+            
+            for (GrassAcre grass1 : grass) {
+                if (grass1.availRes() > 0) {
+                    grassExists = true;
+                    break;
+                }
+            }
+            
+            sheepHungry = false;
+            
+            for (Sheep sheep1 : sheep) {
+                if (sheep1.getLc().getDeficit() > 0) {
+                    sheepHungry = true;
+                    break;
+                }
+            }
+            
+            eatingContinues = grassExists && sheepHungry;
         }
     }
     

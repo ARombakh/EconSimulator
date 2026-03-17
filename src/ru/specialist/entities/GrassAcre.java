@@ -49,6 +49,11 @@ public class GrassAcre implements ChangeDay {
         return length - minLenToEat > 0 ? length - minLenToEat : 0;
     }
     
+    // Passing in the number of resource to eat. Returning available resource
+    public double resToEat(double res) {
+        return res > availRes() ? availRes() : res;
+    }
+    
     public void resourceEaten(double res) {
         setLength(getLength() - res);
     }

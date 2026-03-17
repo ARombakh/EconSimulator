@@ -12,7 +12,7 @@ import ru.specialist.entities.Sheep;
  */
 public class App {
     public static void main(String[] args) {
-        EcoSystem ecoSystem = new EcoSystem(4, 1);
+        EcoSystem ecoSystem = new EcoSystem(4, 3);
         /*
         System.out.println(system.sheep.get(0));
         System.out.println(system.grass.get(0));
