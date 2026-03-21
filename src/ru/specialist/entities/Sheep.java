@@ -4,6 +4,8 @@
  */
 package ru.specialist.entities;
 
+import java.util.Random;
+
 /**
  *
  * @author artyom
@@ -11,10 +13,15 @@ package ru.specialist.entities;
 public class Sheep implements ChangeDay {
     public static final int MAX_AGE = 1800;
     public static final int MATUR_AGE = 360;
+    public static final int PREG_LEN = 150;
+    
     public static final double MAX_RESERVE_CAP = 50;  // reserve capacity
 
     public static final double PREG_RESERVE_CAP = 15;  // pregnancy reserve 
                                                     // capacity
+    
+    public static final double PREG_RESERVE_INC = PREG_RESERVE_CAP / PREG_LEN;
+                                                // pregnancy reserve increment
     
     public static final double MATURE_DC = 2;   // daily consumption of mature
                                                 // pregnant sheep
@@ -64,12 +71,21 @@ public class Sheep implements ChangeDay {
     private boolean alive;
     private boolean mature;
     private int age;    // sheep age
+    private boolean male;
+    private boolean pregnant;
     
     private LivingContainer lc;
     private ResBuildContainer rbc;
     private ResFillContainer rfc;
+    private PregContainer pc;
     
     public Sheep() {
+        Random random = new Random();
+        boolean male = random.nextBoolean();
+        this(male);
+    }
+    
+    public Sheep(boolean male) {
         this.sheepId = sheepCounter;
         sheepCounter++;
         
@@ -80,6 +96,15 @@ public class Sheep implements ChangeDay {
         setLc(new LivingContainer());
         setRbc(new ResBuildContainer());
         setRfc(new ResFillContainer());
+        setMale(male);
+    }
+
+    public boolean isMale() {
+        return male;
+    }
+
+    public boolean isPregnant() {
+        return pregnant;
     }
 
     public LivingContainer getLc() {
@@ -104,6 +129,29 @@ public class Sheep implements ChangeDay {
 
     public boolean isAlive() {
         return alive;
+    }
+
+    public void setMale(boolean male) {
+        this.male = male;
+    }
+
+    public void setPregnant(boolean pregnant) throws Exception {
+        if (this.male) {
+            throw new Exception("Sheep is male and cannot get pregnant!");
+        }
+        
+        if (!this.mature) {
+            throw new Exception("Sheep is immature and cannot get pregnant!");
+        }
+        
+        this.pregnant = pregnant;
+        
+        // ??? How to check that sheep was pregnant before setting the flag?
+        if (this.pregnant) {
+            this.pc = new PregContainer();
+        } else {
+            this.pc = null;
+        }
     }
 
     public void setLc(LivingContainer lc) {
@@ -136,6 +184,12 @@ public class Sheep implements ChangeDay {
 
     public void setAlive(boolean alive) {
         this.alive = alive;
+    }
+    
+    public boolean hasDeficit() {        
+        return getLc().getDeficit() > 0 ||
+            (isMature() ? false : (getRbc().getDeficit() > 0)) ||
+            getRfc().minDeficit() > 0;
     }
     
     public double eat(double availRes) {
@@ -237,9 +291,11 @@ public class Sheep implements ChangeDay {
             } else {
                 double output = getDeficit();
                 setDeficit(0);
-                rfc.setReserveCap(rfc.getReserveCap() +
-                        R_FILL_PER_DAY_IMM);
-                setTodayRCUpdated(true);
+                if (!isTodayRCUpdated()) {
+                    rfc.setReserveCap(rfc.getReserveCap() +
+                            R_FILL_PER_DAY_IMM);
+                    setTodayRCUpdated(true);
+                }
                 return output;
             }
         }
@@ -266,10 +322,14 @@ public class Sheep implements ChangeDay {
         private double reserveCap;
         private double reserveFill;
         
-        public ResFillContainer() {
-            setReserveFill(0);
-            setReserveCap(0);
+        public ResFillContainer(double reserve) {
+            setReserveFill(reserve);
+            setReserveCap(reserve);
             update();
+        }
+        
+        public ResFillContainer() {
+            this(0);
         }
 
         public double getDeficit() {
@@ -288,7 +348,7 @@ public class Sheep implements ChangeDay {
             this.deficit = deficit;
         }
         
-        public void setReserveCap(double reserveCap) {        
+        public void setReserveCap(double reserveCap) {
             if (reserveCap > MAX_RESERVE_CAP) {
                 this.reserveCap = MAX_RESERVE_CAP;
                 setMature(true);
@@ -345,6 +405,78 @@ public class Sheep implements ChangeDay {
                     "Reserve Capacity " + getReserveCap() + "\n" +
                     "Reserve Fill " + getReserveFill() + "\n";
         }
+    }
+    
+    public class PregContainer {
+        private double deficit;
+        
+        // counter of days of no filling pregnancy
+        private int daysNoFill;
+        // counter of days of being pregnant
+        private int daysPreg;
+
+        public int getDaysNoFill() {
+            return daysNoFill;
+        }
+
+        public double getDeficit() {
+            return deficit;
+        }
+
+        public int getDaysPreg() {
+            return daysPreg;
+        }
+
+        public void setDaysNoFill(int daysNoFill) {
+            this.daysNoFill = daysNoFill;
+        }
+
+        public void setDeficit(double deficit) {
+            this.deficit = deficit;
+        }
+
+        public void setDaysPreg(int daysPreg) {
+            this.daysPreg = daysPreg;
+        }
+
+        public double fill(double input) {
+            if (getDeficit() >= input) {
+                setDeficit(getDeficit() - input);
+                return input;
+            } else {
+                double output = getDeficit();
+                setDeficit(0);
+                return output;
+            }
+        }
+        
+        public Sheep update() throws Exception {
+            // Update counter of days
+            if (getDeficit() > 0) {
+                setDaysNoFill(getDaysNoFill() + 1);
+            } else {
+                setDaysNoFill(0);
+            }
+            
+            setDeficit(PREG_R_CONS);
+            
+            if (getDaysNoFill() == 10) {
+                setPregnant(false);
+            }
+            
+            setDaysPreg(getDaysPreg() + 1);
+            
+            if (getDaysPreg() == PREG_LEN) {
+                return giveBirth();
+            }
+            
+            return null;
+        }
+    }
+    
+    public Sheep giveBirth() throws Exception {
+        setPregnant(false);
+        return new Sheep();
     }
     
     @Override

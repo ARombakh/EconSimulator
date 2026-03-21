@@ -4,12 +4,18 @@
  */
 package ru.specialist;
 
+import ru.specialist.entities.ChangeDay;
+
 /**
  *
  * @author artyom
  */
 public class Controller {
     private EcoSystem ecoSystem;
+
+    public Controller(EcoSystem ecoSystem) {
+        this.ecoSystem = ecoSystem;
+    }
 
     public EcoSystem getEcoSystem() {
         return ecoSystem;
@@ -19,10 +25,14 @@ public class Controller {
         this.ecoSystem = ecoSystem;
     }
     
+    public void dailyInteraction() {
+        getEcoSystem().feedAllSheep();
+        getEcoSystem().dayPasses();        
+    }
+    
     public void run() {
         while (!getEcoSystem().isDead()) {            
-            getEcoSystem().feedAllSheep();
-            getEcoSystem().dayPasses();
+            dailyInteraction();
         }
     }
 }

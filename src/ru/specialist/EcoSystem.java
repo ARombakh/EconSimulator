@@ -55,14 +55,7 @@ public class EcoSystem implements ChangeDay {
         while (eatingContinues) {            
             for (Sheep sheep1 : sheep) {
                 for (GrassAcre grass1 : grass) {
-                    System.out.printf(sheep1 + "\n");   // Debug
-                    System.out.println(grass1);   // Debug
-
                     feedOneSheep(sheep1, grass1);
-
-                    System.out.printf("Feeding sheep:\n");   // Debug
-                    System.out.println(sheep1);   // Debug
-                    System.out.println(grass1);   // Debug
                 }
             }
             
@@ -78,7 +71,7 @@ public class EcoSystem implements ChangeDay {
             sheepHungry = false;
             
             for (Sheep sheep1 : sheep) {
-                if (sheep1.getLc().getDeficit() > 0) {
+                if (sheep1.hasDeficit()) {
                     sheepHungry = true;
                     break;
                 }

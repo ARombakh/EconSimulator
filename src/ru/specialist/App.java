@@ -11,7 +11,8 @@ import ru.specialist.entities.Sheep;
  * @author artyom
  */
 public class App {
-    public static void main(String[] args) {
+    public static void main(String[] args) throws Exception {
+        /*
         EcoSystem ecoSystem = new EcoSystem(4, 1);
 
         System.out.println("Sheep quantity " + ecoSystem.sheep.size());
@@ -22,5 +23,20 @@ public class App {
         controller.run();
         
         System.out.println("Sheep quantity " + ecoSystem.sheep.size());
+        */
+        Sheep sheep = new Sheep(false);
+        
+        EcoSystem ecoSystem = new EcoSystem(0, 5);
+        
+        ecoSystem.sheep.add(sheep);
+        
+        Controller controller = new Controller(ecoSystem);
+        
+        while (controller.getEcoSystem().sheep.getFirst().getAge() < 400) {
+            System.out.printf("%s\n", controller.getEcoSystem());   // Debug
+            controller.dailyInteraction();
+        }
+        
+//        sheep.setPregnant(true);
     }
 }
