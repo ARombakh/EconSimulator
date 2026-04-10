@@ -384,7 +384,7 @@ public class Sheep implements ChangeDay {
         }
         
         public double fill(double input) {
-            if (getDeficit() >= input) {
+            if (minDeficit() >= input) {
                 setDeficit(getDeficit() - input);
                 setReserveFill(getReserveFill() + input);
                 return input;
