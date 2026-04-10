@@ -32,11 +32,11 @@ public class App {
         
         Controller controller = new Controller(ecoSystem);
         
-        while (controller.getEcoSystem().sheep.getFirst().getAge() < 400) {
+        sheep = controller.getEcoSystem().sheep.getFirst();
+        
+        while (sheep.getAge() < 400) {
             System.out.printf("%s\n", controller.getEcoSystem());   // Debug
             controller.dailyInteraction();
         }
-        
-//        sheep.setPregnant(true);
     }
 }
