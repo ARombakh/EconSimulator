@@ -51,7 +51,11 @@ public class Sheep implements ChangeDay {
                                                     //  spend on filling
                                                     // reserve
 
-    public static final double R_FILL_PER_DAY_IMM = MAX_RESERVE_CAP / MATUR_AGE;
+    public static final double R_FILL_PER_DAY_IMM = MAX_RESERVE_CAP /
+                                (double)(MATUR_AGE - .5);    
+                                                    // minus .5 so that RC
+                                                    // max'es at maturity
+    
                                                 // daily fill of reserve
                                                 // for immature sheep
     
@@ -204,10 +208,17 @@ public class Sheep implements ChangeDay {
             eatenRes += this.rbc.fill(availRes - eatenRes);
             if (availRes - eatenRes == 0) {
                 return eatenRes;
-            }            
-        }        
+            }
+        }
 
         eatenRes += this.rfc.fill(availRes - eatenRes);
+        if (availRes - eatenRes == 0) {
+            return eatenRes;
+        }
+        
+        if (isPregnant()) {
+            eatenRes += this.pc.fill(availRes - eatenRes);
+        }
                 
         return eatenRes;
     }
@@ -220,6 +231,9 @@ public class Sheep implements ChangeDay {
         rbc.update();
         rfc.update();
         setAge(getAge() + 1);
+        /*if (pc != null) {
+            pc.update();
+        }*/
     }
     
     public class LivingContainer {
@@ -472,6 +486,14 @@ public class Sheep implements ChangeDay {
             
             return null;
         }
+        
+        @Override
+        public String toString() {
+            return "Days pregnancy " + getDaysPreg() + "\n" +
+                    "Days no filling for pregnancy " + getDaysNoFill() + "\n" +
+                    "Pregnancy consumption " + PREG_R_CONS + "\n" +
+                    "Deficit " + getDeficit() + "\n";                    
+        }
     }
     
     public Sheep giveBirth() throws Exception {
@@ -486,7 +508,8 @@ public class Sheep implements ChangeDay {
                 "Mature " + mature + "\n" +
                 "Age " + age + "\n\n" +
                 "LC " + lc + "\n" +
-                (!mature ? "RBC " + rbc + "\n" : "") +
-                "RFC " + rfc + "\n";
+                (!isMature() ? "RBC " + rbc + "\n" : "") +
+                "RFC " + rfc + "\n" +
+                (isPregnant() ? "PC " + pc + "\n" : "");
     }
 }
