@@ -20,7 +20,7 @@ public class EcoSystem implements ChangeDay {
     // One bite of grass
     private double bite = 0.02;
     
-    public EcoSystem(int sheep, int grassAcre) {
+    public EcoSystem(int sheep, int grassAcre) throws Exception {
         for (int i = 0; i < sheep; i++) {
             this.sheep.add(new Sheep());
         }
@@ -35,7 +35,8 @@ public class EcoSystem implements ChangeDay {
         return sheep.size() == 0;
     }
     
-    public boolean feedOneSheep(Sheep sheep, GrassAcre grassAcre) {
+    public boolean feedOneSheep(Sheep sheep, GrassAcre grassAcre) 
+            throws Exception {
         double eaten = sheep.eat(grassAcre.resToEat(bite));
         if (eaten == 0) {
             return false;
@@ -45,7 +46,7 @@ public class EcoSystem implements ChangeDay {
         }
     }
     
-    public void feedAllSheep() {
+    public void feedAllSheep() throws Exception {
         boolean eatingContinues = true;
         // Flag that grass to eat exists
         boolean grassExists;
@@ -82,7 +83,7 @@ public class EcoSystem implements ChangeDay {
     }
     
     @Override
-    public void dayPasses() {        
+    public void dayPasses() throws Exception {        
         for (int i = sheep.size() - 1; i >= 0; i--) {
             sheep.get(i).dayPasses();
             if (!sheep.get(i).isAlive()) {

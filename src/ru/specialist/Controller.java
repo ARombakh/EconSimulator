@@ -25,12 +25,12 @@ public class Controller {
         this.ecoSystem = ecoSystem;
     }
     
-    public void dailyInteraction() {
+    public void dailyInteraction() throws Exception {
         getEcoSystem().feedAllSheep();
         getEcoSystem().dayPasses();        
     }
     
-    public void run() {
+    public void run() throws Exception {
         while (!getEcoSystem().isDead()) {            
             dailyInteraction();
         }

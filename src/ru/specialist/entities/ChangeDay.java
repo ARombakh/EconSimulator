@@ -9,5 +9,5 @@ package ru.specialist.entities;
  * @author artyom
  */
 public interface ChangeDay {
-    public void dayPasses();
+    public void dayPasses() throws Exception;
 }

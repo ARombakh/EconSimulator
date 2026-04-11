@@ -41,7 +41,7 @@ public class GrassAcre implements ChangeDay {
     }
     
     @Override
-    public void dayPasses() {
+    public void dayPasses() throws Exception {
         increment();
     }
     

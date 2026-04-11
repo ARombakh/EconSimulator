@@ -83,13 +83,13 @@ public class Sheep implements ChangeDay {
     private ResFillContainer rfc;
     private PregContainer pc;
     
-    public Sheep() {
+    public Sheep() throws Exception {
         Random random = new Random();
         boolean male = random.nextBoolean();
         this(male);
     }
     
-    public Sheep(boolean male) {
+    public Sheep(boolean male) throws Exception {
         this.sheepId = sheepCounter;
         sheepCounter++;
         
@@ -196,7 +196,7 @@ public class Sheep implements ChangeDay {
             getRfc().minDeficit() > 0;
     }
     
-    public double eat(double availRes) {
+    public double eat(double availRes) throws Exception {
         double eatenRes = 0;
         
         eatenRes += this.lc.fill(availRes - eatenRes);
@@ -224,7 +224,7 @@ public class Sheep implements ChangeDay {
     }
     
     @Override
-    public void dayPasses() {
+    public void dayPasses() throws Exception {
         lc.fill(rfc.extract(lc.getDeficit()));
         setAlive(lc.getDeficit() == 0);
         lc.update();
@@ -298,7 +298,7 @@ public class Sheep implements ChangeDay {
             this.todayRCUpdated = todayRCUpdated;
         }
 
-        public double fill(double input) {
+        public double fill(double input) throws Exception {
             if (getDeficit() >= input) {
                 setDeficit(getDeficit() - input);
                 return input;
@@ -336,13 +336,13 @@ public class Sheep implements ChangeDay {
         private double reserveCap;
         private double reserveFill;
         
-        public ResFillContainer(double reserve) {
+        public ResFillContainer(double reserve) throws Exception {
             setReserveFill(reserve);
             setReserveCap(reserve);
             update();
         }
         
-        public ResFillContainer() {
+        public ResFillContainer() throws Exception {
             this(0);
         }
 
@@ -362,16 +362,23 @@ public class Sheep implements ChangeDay {
             this.deficit = deficit;
         }
         
-        public void setReserveCap(double reserveCap) {
+        public void setReserveCap(double reserveCap) throws Exception {
             if (reserveCap > MAX_RESERVE_CAP) {
-                this.reserveCap = MAX_RESERVE_CAP;
-                setMature(true);
+                throw new Exception("Reserve Capacity of the sheep is higher "
+                        + "than maximum reserve capacity");
             } else {
                 this.reserveCap = reserveCap;
+                if (this.reserveCap == MAX_RESERVE_CAP) {
+                    setMature(true);
+                }
             }
         }
 
-        public void setReserveFill(double reserveFill) {
+        public void setReserveFill(double reserveFill) throws Exception {
+            if (reserveFill > this.reserveCap) {
+                throw new Exception("Filling of the sheep's reserve is higher "
+                        + "than reserve capacity");
+            }
             this.reserveFill = reserveFill;
         }
 
@@ -383,7 +390,7 @@ public class Sheep implements ChangeDay {
                     getReserveFill());
         }
         
-        public double fill(double input) {
+        public double fill(double input) throws Exception {
             if (minDeficit() >= input) {
                 setDeficit(getDeficit() - input);
                 setReserveFill(getReserveFill() + input);
@@ -396,7 +403,7 @@ public class Sheep implements ChangeDay {
             }
         }
         
-        public double extract(double needed) {
+        public double extract(double needed) throws Exception {
             if (needed >= getReserveFill()) {
                 double output = getReserveFill();
                 setReserveFill(0);
